@@ -1,0 +1,463 @@
+[html-validate-disable no-inline-style]
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NovaSky — DarkShield Full Test Surface</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:    #0d1117;
+      --sky:    #1d4ed8;
+      --sky-lt: #eff6ff;
+      --cloud:  #f0f4f8;
+      --mist:   #94a3b8;
+      --white:  #ffffff;
+      --red:    #dc2626;
+      --orange: #ea580c;
+      --green:  #16a34a;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(0,0,0,.09);
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--cloud); color: var(--ink); line-height: 1.5; }
+
+    .nav { background: var(--sky); height: 54px; display: flex; align-items: center; padding: 0 2rem; gap: 2rem; position: sticky; top: 0; z-index: 50; }
+    .nav-logo { color: #fff; font-size: 1.15rem; font-weight: 800; }
+    .nav a { color: rgba(255,255,255,.75); font-size: .85rem; text-decoration: none; }
+
+    .page { max-width: 980px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+    /* LEGEND */
+    .legend { background: var(--ink); color: #e2e8f0; border-radius: var(--radius); padding: 1.1rem 1.4rem; margin-bottom: 1.75rem; font-size: .8rem; line-height: 1.7; }
+    .legend strong { color: #fff; font-size: .85rem; }
+    .legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .4rem .75rem; margin-top: .6rem; }
+    .legend-item { display: flex; align-items: baseline; gap: .4rem; }
+    .lbadge { font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
+    .lbadge.pre  { background: #fed7d7; color: #9b2c2c; }
+    .lbadge.cs   { background: #feebc8; color: #7b341e; }
+    .lbadge.fu   { background: #e9d8fd; color: #5b21b6; }
+    .lbadge.high { border: 1px solid #f87171; color: #f87171; background: transparent; }
+    .lbadge.med  { border: 1px solid #fbbf24; color: #fbbf24; background: transparent; }
+
+    /* SECTION HEAD */
+    .section-head { display: flex; align-items: center; gap: .75rem; margin: 1.75rem 0 .75rem; }
+    .section-head h2 { font-size: 1rem; font-weight: 700; }
+    .pill { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 2px 8px; border-radius: 4px; }
+
+    /* CARD */
+    .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 1rem; }
+    .card-hd { padding: .85rem 1.25rem; background: var(--sky-lt); border-bottom: 1px solid #dbeafe; font-size: .875rem; font-weight: 600; color: var(--sky); }
+    .card-bd { padding: 1.1rem 1.25rem; }
+
+    /* TEST ITEM WRAPPER */
+    .test-item { border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: .9rem 1rem; margin-bottom: .85rem; position: relative; }
+    .test-item:last-child { margin-bottom: 0; }
+    .test-ann { position: absolute; top: -10px; left: 10px; font-size: .65rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--white); padding: 0 5px; color: var(--mist); }
+
+    /* CHECKBOXES */
+    .cb-row { display: flex; align-items: flex-start; gap: .75rem; }
+    .cb-row input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--sky); flex-shrink: 0; }
+    .cb-label { font-size: .9rem; }
+    .cb-sub   { font-size: .75rem; color: var(--mist); margin-top: .15rem; }
+    .cb-price { font-size: .8rem; color: var(--mist); font-weight: 600; }
+
+    /* MOCK MODAL */
+    .mock-modal { border: 1.5px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+    .modal-top-bar { background: var(--sky); color: #fff; padding: .85rem 1.1rem; text-align: center; }
+    .modal-top-bar h3 { font-size: .95rem; font-weight: 800; }
+    .modal-top-bar p  { font-size: .75rem; opacity: .85; margin-top: .15rem; }
+    .modal-inner { padding: .85rem 1.1rem 1rem; text-align: center; }
+    .btn-accept { display: block; width: 100%; background: var(--green); color: #fff; border: none; border-radius: 7px; padding: .6rem; font-size: .875rem; font-weight: 700; cursor: pointer; margin-bottom: .5rem; }
+    .btn-cs-high { display: block; width: 100%; background: none; border: none; color: #9ca3af; font-size: .72rem; cursor: pointer; text-decoration: underline; padding: .2rem; }
+    .btn-cs-edge { display: block; width: 100%; background: none; border: 1px solid #e2e8f0; border-radius: 6px; color: #6b7280; font-size: .8rem; cursor: pointer; padding: .4rem; margin-top: .35rem; }
+
+    /* URGENCY ELEMENTS */
+    .urgency-banner { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: .6rem .9rem; font-size: .85rem; color: var(--red); font-weight: 600; display: flex; align-items: center; gap: .5rem; }
+    .social-proof { font-size: .82rem; color: var(--orange); font-weight: 600; display: flex; align-items: center; gap: .4rem; }
+    .live-dot { width: 7px; height: 7px; background: var(--orange); border-radius: 50%; display: inline-block; animation: blink 1.2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .expiry-bar { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: .6rem .9rem; font-size: .82rem; color: #92400e; font-weight: 600; }
+    .expiry-bar span { color: var(--red); font-weight: 800; font-variant-numeric: tabular-nums; }
+
+    /* STRUCTURAL TIMERS */
+    .countdown { font-size: 1.4rem; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: 2px; color: var(--red); font-family: 'Courier New', monospace; }
+    .timer-chip { display: inline-block; background: var(--red); color: #fff; border-radius: 6px; padding: .2rem .65rem; font-size: .85rem; font-weight: 800; font-variant-numeric: tabular-nums; font-family: monospace; }
+
+    /* PRICE */
+    .price-was { text-decoration: line-through; color: var(--mist); font-size: .85rem; }
+    .price-now { font-size: 1.3rem; font-weight: 900; color: var(--red); }
+    .price-badge { background: #fef08a; color: #713f12; font-size: .7rem; font-weight: 800; padding: 1px 6px; border-radius: 4px; margin-left: .3rem; }
+
+    /* LAYOUT */
+    .layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; }
+    .sidebar { position: sticky; top: 70px; }
+    .sidebar .card-hd { background: var(--ink); color: #fff; border-bottom: none; }
+    .sidebar-price { padding: .9rem 1.25rem; border-bottom: 1px solid #f0f0f0; }
+    .sidebar-inner { padding: 1rem 1.25rem 1.25rem; }
+    .w-field { margin-bottom: .7rem; }
+    .w-field label { display: block; font-size: .72rem; font-weight: 600; color: var(--mist); margin-bottom: .25rem; text-transform: uppercase; }
+    .w-field select, .w-field input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 7px; padding: .5rem .75rem; font-size: .875rem; }
+    .btn-book { display: block; width: 100%; background: var(--sky); color: #fff; border: none; border-radius: 8px; padding: .8rem; font-size: .95rem; font-weight: 800; cursor: pointer; margin-top: .6rem; }
+
+    /* FLIGHT ROWS */
+    .flight-row { display: flex; align-items: center; justify-content: space-between; padding: .8rem 1.25rem; border-bottom: 1px solid #f0f4f8; }
+    .flight-row:last-child { border-bottom: none; }
+    .airline-name { font-weight: 700; font-size: .95rem; }
+    .flight-times { font-size: .85rem; color: #475569; margin-top: .15rem; }
+    .flight-stops { font-size: .72rem; color: var(--mist); }
+    .select-btn { background: var(--sky); color: #fff; border: none; border-radius: 7px; padding: .45rem 1rem; font-size: .82rem; font-weight: 600; cursor: pointer; }
+
+    @media (max-width: 660px) { .layout { grid-template-columns: 1fr; } .sidebar { position: static; } }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-logo">✦ NovaSky</span>
+  <a href="#">Flights</a>
+  <a href="#">Hotels</a>
+  <a href="#">My Trips</a>
+</nav>
+
+<div class="page">
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <strong>🧪 DarkShield v1.1 — Full Test Surface</strong> &nbsp;·&nbsp; Paste darkshield-v1.1.js into DevTools console to run.
+    <div class="legend-grid">
+      <div class="legend-item"><span class="lbadge pre">Pre-ticked</span><span class="lbadge high">HIGH</span>&nbsp;Checked checkbox + commercial keyword in label</div>
+      <div class="legend-item"><span class="lbadge pre">Pre-ticked</span><span class="lbadge med">MED</span>&nbsp;Checked checkbox with no associated label text</div>
+      <div class="legend-item"><span class="lbadge cs">Confirmshaming</span><span class="lbadge high">HIGH</span>&nbsp;Guilt-framed decline text matching a regex pattern</div>
+      <div class="legend-item"><span class="lbadge fu">False Urgency</span><span class="lbadge high">HIGH</span>&nbsp;Pass A text-node match (scarcity / social / expiry / countdown)</div>
+      <div class="legend-item"><span class="lbadge fu">False Urgency</span><span class="lbadge med">MED</span>&nbsp;Pass B structural: class/id heuristic or isolated MM:SS value</div>
+    </div>
+  </div>
+
+  <div class="layout">
+  <div>
+
+    <!-- ═══ PRESELECTION ════════════════════════════════════════════════ -->
+    <div class="section-head">
+      <h2>Add-ons &amp; Extras</h2>
+      <span class="pill" style="background:#fed7d7;color:#9b2c2c;">Pre-ticked</span>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Recommended for your trip — added by default</div>
+      <div class="card-bd">
+
+        <!-- HIGH: wrapping label → "travel insurance" keyword -->
+        <div class="test-item">
+          <span class="test-ann">PRE-TICKED · HIGH — keyword in wrapping &lt;label&gt;</span>
+          <label class="cb-row">
+            <input type="checkbox" id="cb-ins" checked/>
+            <div>
+              <div class="cb-label">Travel Insurance — comprehensive cover</div>
+              <div class="cb-sub">Cancellations, medical emergencies &amp; lost baggage</div>
+              <div class="cb-price">+£38.99 · added automatically</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- HIGH: aria-label → "priority boarding" keyword -->
+        <div class="test-item">
+          <span class="test-ann">PRE-TICKED · HIGH — keyword via aria-label</span>
+          <div class="cb-row">
+            <input type="checkbox" id="cb-pri" checked aria-label="Priority boarding add-on — skip the queue"/>
+            <div>
+              <div class="cb-label">Board First</div>
+              <div class="cb-sub">Priority access at the gate</div>
+              <div class="cb-price">+£12.99</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HIGH: label[for=] → "airport transfer" keyword -->
+        <div class="test-item">
+          <span class="test-ann">PRE-TICKED · HIGH — keyword via label[for=]</span>
+          <div class="cb-row">
+            <input type="checkbox" id="cb-xfer" checked/>
+            <div>
+              <label for="cb-xfer" class="cb-label">Airport transfer (return)</label>
+              <div class="cb-sub">Private taxi · meet &amp; greet included</div>
+              <div class="cb-price">+£64.00 per booking</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEDIUM: checked, no id / no aria-label / no label / parent text < 5 chars -->
+        <div class="test-item">
+          <span class="test-ann">PRE-TICKED · MEDIUM — no label text at all</span>
+          <div style="display:flex;align-items:center;gap:.5rem;">
+            <input type="checkbox" checked style="width:16px;height:16px;accent-color:#1d4ed8;"/>
+            <!-- No label, no aria-label, no id, parent text intentionally empty -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ CONFIRMSHAMING ══════════════════════════════════════════════ -->
+    <div class="section-head">
+      <h2>Member Offers</h2>
+      <span class="pill" style="background:#feebc8;color:#7b341e;">Confirmshaming</span>
+    </div>
+
+    <div class="card">
+      <div class="card-bd" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+        <!-- HIGH: /no[,\s]+thanks?[,\s]+i.*prefer to pay/ -->
+        <div class="test-item">
+          <span class="test-ann">CS · HIGH — "prefer to pay full price"</span>
+          <div class="mock-modal">
+            <div class="modal-top-bar"><h3>Save 15% today</h3><p>Join free · cancel anytime</p></div>
+            <div class="modal-inner">
+              <button class="btn-accept">Yes! Unlock my discount</button>
+              <button class="btn-cs-high">No thanks, I prefer to pay full price</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HIGH: /i don't want to save/ -->
+        <div class="test-item">
+          <span class="test-ann">CS · HIGH — "I don't want to save money"</span>
+          <div class="mock-modal">
+            <div class="modal-top-bar"><h3>Get £20 off your next trip</h3><p>Enter your email</p></div>
+            <div class="modal-inner">
+              <button class="btn-accept">Claim my £20</button>
+              <button class="btn-cs-high">No, I don't want to save money</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HIGH: /i'd rather pay (full|more)/ -->
+        <div class="test-item">
+          <span class="test-ann">CS · HIGH — "I'd rather pay more"</span>
+          <div class="mock-modal">
+            <div class="modal-top-bar"><h3>Unlock member-only rates</h3><p>Free to join</p></div>
+            <div class="modal-inner">
+              <button class="btn-accept">Join free</button>
+              <button class="btn-cs-edge">I'd rather pay more without a membership</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HIGH: /that's ok.*i like paying/ -->
+        <div class="test-item">
+          <span class="test-ann">CS · HIGH — "That's okay, I like paying full price"</span>
+          <div class="mock-modal">
+            <div class="modal-top-bar"><h3>Price drop alert set!</h3><p>We'll email you if it drops</p></div>
+            <div class="modal-inner">
+              <button class="btn-accept">Yes, notify me</button>
+              <button class="btn-cs-high">That's okay, I like paying full price</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ FALSE URGENCY — HIGH (Pass A text matches) ══════════════════ -->
+    <div class="section-head">
+      <h2>Available Flights</h2>
+      <span class="pill" style="background:#e9d8fd;color:#5b21b6;">False Urgency · High</span>
+    </div>
+
+    <div class="card">
+      <!-- SCARCITY · HIGH -->
+      <div class="test-item" style="margin:1rem 1rem .5rem;">
+        <span class="test-ann">FU · HIGH · scarcity — "only 2 seats left"</span>
+        <div class="urgency-banner">⚠ Only 2 seats left at this price!</div>
+      </div>
+
+      <div class="flight-row">
+        <div>
+          <div class="airline-name">NovaSky NV201</div>
+          <div class="flight-times">06:45 → 09:50 · 3h 05m</div>
+          <div class="flight-stops">Non-stop</div>
+        </div>
+        <div style="text-align:right">
+          <div class="price-was">£189</div>
+          <div class="price-now">£141<span class="price-badge">–25%</span></div>
+          <button class="select-btn" style="margin-top:.4rem">Select</button>
+        </div>
+      </div>
+
+      <!-- SOCIAL · HIGH -->
+      <div class="test-item" style="margin:.5rem 1rem;">
+        <span class="test-ann">FU · HIGH · social — "23 people booked today"</span>
+        <div class="social-proof"><span class="live-dot"></span> 23 people booked this flight today</div>
+      </div>
+
+      <div class="flight-row">
+        <div>
+          <div class="airline-name">NovaSky NV205</div>
+          <div class="flight-times">11:20 → 14:25 · 3h 05m</div>
+          <div class="flight-stops">Non-stop</div>
+        </div>
+        <div style="text-align:right">
+          <div class="price-was">£219</div>
+          <div class="price-now">£164<span class="price-badge">–25%</span></div>
+          <button class="select-btn" style="margin-top:.4rem">Select</button>
+        </div>
+      </div>
+
+      <!-- SOCIAL · HIGH — viewer count -->
+      <div class="test-item" style="margin:.5rem 1rem 1rem;">
+        <span class="test-ann">FU · HIGH · social — "X people viewing right now"</span>
+        <div class="social-proof"><span class="live-dot"></span><span id="viewer-count">14</span> people are viewing this right now</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Today's Exclusive Rate</div>
+      <div class="card-bd">
+
+        <!-- EXPIRY · HIGH — "limited-time offer" -->
+        <div class="test-item">
+          <span class="test-ann">FU · HIGH · expiry — "limited-time offer"</span>
+          <div class="expiry-bar">⏱ Limited-time offer — price valid today only. Book now to secure this rate before it expires.</div>
+        </div>
+
+        <!-- EXPIRY · HIGH — "flash sale" -->
+        <div class="test-item" style="margin-top:.75rem">
+          <span class="test-ann">FU · HIGH · expiry — "flash sale ends today"</span>
+          <div class="expiry-bar">⚡ Flash sale — save 25% · Sale ends today at midnight.</div>
+        </div>
+
+        <!-- COUNTDOWN · HIGH — text phrase + inline MM:SS -->
+        <div class="test-item" style="margin-top:.75rem">
+          <span class="test-ann">FU · HIGH · countdown — "price locked for MM:SS" (text match)</span>
+          <div class="expiry-bar">🔒 Price locked for <span id="timer-text">09:59</span> — complete your booking before time runs out.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ FALSE URGENCY — MEDIUM (Pass B structural) ══════════════════ -->
+    <div class="section-head">
+      <h2>Seat Hold Timers</h2>
+      <span class="pill" style="background:#e9d8fd;color:#5b21b6;">False Urgency · Medium</span>
+    </div>
+
+    <div class="card">
+      <div class="card-bd">
+
+        <!-- MEDIUM: class="countdown" — no surrounding urgency text -->
+        <div class="test-item">
+          <span class="test-ann">FU · MEDIUM — class="countdown" (structural, no text keyword)</span>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div class="countdown" id="countdown-a">09:42</div>
+            <div style="font-size:.82rem;color:#64748b;">Session timer</div>
+          </div>
+        </div>
+
+        <!-- MEDIUM: id="timer" — Pass B B1 selector [id*="timer"] -->
+        <div class="test-item">
+          <span class="test-ann">FU · MEDIUM — id="timer" (structural selector)</span>
+          <div style="display:flex;align-items:center;gap:.75rem;">
+            <span style="font-size:.82rem;color:#64748b;">Seat hold expires:</span>
+            <span id="timer" style="font-weight:800;font-variant-numeric:tabular-nums;color:#dc2626;">07:31</span>
+          </div>
+        </div>
+
+        <!-- MEDIUM: isolated MM:SS element — Pass B B2 text regex -->
+        <div class="test-item">
+          <span class="test-ann">FU · MEDIUM — isolated MM:SS value (Pass B text regex)</span>
+          <div style="display:flex;align-items:center;gap:.75rem;">
+            <span style="font-size:.82rem;color:#64748b;">Price hold:</span>
+            <!-- Entire innerText of this element is just the timer value -->
+            <span class="timer-chip" id="timer-isolated">04:17</span>
+          </div>
+        </div>
+
+        <!-- MEDIUM: class contains "timer" — [class*="timer"] selector -->
+        <div class="test-item">
+          <span class="test-ann">FU · MEDIUM — class contains "timer" (selector match)</span>
+          <div style="font-size:.82rem;color:#64748b;margin-bottom:.4rem;">Your selected fare is reserved for:</div>
+          <div class="timer-chip" id="timer-chip-b">02:55</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-hd">Your Booking</div>
+      <div class="sidebar-price">
+        <div style="font-size:.75rem;color:#94a3b8;margin-bottom:.2rem;">LONDON → PARIS</div>
+        <div class="price-was">From £189</div>
+        <div class="price-now" style="font-size:1.5rem">£141</div>
+        <div style="font-size:.72rem;color:#94a3b8;">per person · taxes included</div>
+      </div>
+      <div class="sidebar-inner">
+
+        <!-- SCARCITY · HIGH (sidebar — separate text node) -->
+        <div class="test-item" style="margin-bottom:.75rem">
+          <span class="test-ann">FU · HIGH · scarcity (sidebar)</span>
+          <div style="font-size:.78rem;color:#dc2626;font-weight:700;">⚠ Only 2 rooms left at this price</div>
+        </div>
+
+        <!-- MEDIUM: class="countdown" in sidebar -->
+        <div class="test-item" style="margin-bottom:.75rem">
+          <span class="test-ann">FU · MEDIUM — class="countdown" (sidebar)</span>
+          <div style="font-size:.75rem;color:#64748b;margin-bottom:.2rem">Fare expires in:</div>
+          <div class="countdown" id="countdown-sidebar">09:59</div>
+        </div>
+
+        <div class="w-field"><label>Depart</label><input type="date" value="2026-07-14"/></div>
+        <div class="w-field"><label>Return</label><input type="date" value="2026-07-21"/></div>
+        <div class="w-field"><label>Passengers</label><select><option>1 adult</option><option>2 adults</option></select></div>
+
+        <!-- CS · HIGH (sidebar — different pattern) -->
+        <div class="test-item" style="margin-top:.75rem">
+          <span class="test-ann">CS · HIGH — sidebar decline</span>
+          <button class="btn-book">Book now — lock this price</button>
+          <button class="btn-cs-high" style="margin-top:.5rem;display:block;width:100%">
+            No thanks, I'd rather miss out on this deal
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /layout -->
+</div><!-- /page -->
+
+<script>
+  function ticker(id, s) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let rem = s;
+    setInterval(() => {
+      if (rem <= 0) rem = s;
+      const m = String(Math.floor(rem / 60)).padStart(2,'0');
+      const sec = String(rem % 60).padStart(2,'0');
+      el.textContent = m + ':' + sec;
+      rem--;
+    }, 1000);
+  }
+  ticker('timer-text', 599);
+  ticker('countdown-a', 582);
+  ticker('timer', 451);
+  ticker('timer-isolated', 257);
+  ticker('timer-chip-b', 175);
+  ticker('countdown-sidebar', 599);
+
+  let v = 14;
+  setInterval(() => {
+    v += Math.floor(Math.random() * 4) - 1;
+    v = Math.max(8, Math.min(40, v));
+    const el = document.getElementById('viewer-count');
+    if (el) el.textContent = v;
+  }, 3500);
+</script>
+</body>
+</html>
