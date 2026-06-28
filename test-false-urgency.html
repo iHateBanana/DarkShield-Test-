@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuickStay – Hotel Deals</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --orange: #ea580c;
+      --green: #16a34a;
+      --blue: #2563eb;
+      --grey-bg: #f8fafc;
+      --grey-border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--grey-bg);
+      color: var(--text);
+    }
+
+    nav {
+      background: var(--blue);
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      gap: 2rem;
+    }
+    nav .logo { color: #fff; font-size: 1.1rem; font-weight: 800; }
+    nav a { color: rgba(255,255,255,.8); font-size: .85rem; text-decoration: none; }
+
+    .page { max-width: 960px; margin: 1.5rem auto 3rem; padding: 0 1rem; }
+
+    /* HOTEL HEADER */
+    .hotel-header { margin-bottom: 1.25rem; }
+    .hotel-header h1 { font-size: 1.6rem; font-weight: 800; }
+    .hotel-header .meta { font-size: .875rem; color: var(--muted); margin-top: .3rem; }
+    .stars { color: #f59e0b; letter-spacing: 2px; }
+
+    /* PHOTO GRID */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: 200px 200px;
+      gap: 6px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .photo-grid div { background: #cbd5e1; }
+    .photo-grid div:first-child { grid-row: span 2; background: #94a3b8; }
+
+    /* TWO-COL LAYOUT */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 1px 8px rgba(0,0,0,.07);
+      margin-bottom: 1.25rem;
+    }
+    .card-body { padding: 1.25rem 1.5rem; }
+
+    /* SECTION HEADING */
+    .sec-title { font-size: .95rem; font-weight: 700; margin-bottom: .75rem; }
+
+    /* ABOUT */
+    .about p { font-size: .875rem; color: #475569; line-height: 1.6; }
+
+    /* ═══════════════════════════════════════════
+       FALSE URGENCY ELEMENTS
+       ─────────────────────────────────────────
+       1. COUNTDOWN TIMER  — fake deadline, resets on reload
+       2. SCARCITY BANNER  — "Only 2 rooms left" (static, not real)
+       3. SOCIAL PROOF SPAM — "X people looking / Y booked today"
+       4. PRICE STRIKE     — fake was/now price
+       5. DEAL EXPIRY      — "Price valid for next 10 minutes"
+    ═══════════════════════════════════════════ -->
+
+    /* 1. COUNTDOWN BANNER */
+    .countdown-bar {
+      background: var(--red);
+      color: #fff;
+      text-align: center;
+      padding: .6rem 1rem;
+      font-size: .875rem;
+      font-weight: 600;
+      border-radius: 8px 8px 0 0;
+    }
+    .countdown-bar #timer {
+      font-size: 1.1rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 1px;
+      margin-left: .4rem;
+    }
+
+    /* 2. SCARCITY PILL */
+    .scarcity {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--red-light);
+      color: var(--red);
+      border: 1px solid #fca5a5;
+      border-radius: 6px;
+      padding: .3rem .7rem;
+      font-size: .78rem;
+      font-weight: 700;
+      margin-bottom: .75rem;
+    }
+    .scarcity::before { content: '⚠'; }
+
+    /* ROOM CARD */
+    .room-card {
+      border: 1.5px solid var(--grey-border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: .9rem;
+    }
+    .room-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 1rem 1.2rem;
+    }
+    .room-name { font-weight: 700; font-size: .95rem; }
+    .room-features { font-size: .78rem; color: var(--muted); margin-top: .2rem; }
+
+    /* 4. FAKE PRICE STRIKE */
+    .price-was {
+      font-size: .8rem;
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+    .price-now {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--red);
+    }
+    .price-sub { font-size: .72rem; color: var(--muted); }
+    .discount-badge {
+      background: #fef08a;
+      color: #713f12;
+      font-size: .7rem;
+      font-weight: 800;
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      margin-left: .4rem;
+    }
+
+    .room-card-bottom {
+      background: #f8fafc;
+      border-top: 1px solid var(--grey-border);
+      padding: .6rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* 3. SOCIAL PROOF LIVE TEXT */
+    .social-proof {
+      font-size: .75rem;
+      color: var(--orange);
+      font-weight: 600;
+    }
+
+    .btn-book {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .55rem 1.1rem;
+      font-size: .875rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-book:hover { background: #15803d; }
+
+    /* RIGHT PANEL — BOOKING WIDGET */
+    .book-widget { position: sticky; top: 1.5rem; }
+    .book-widget .card { overflow: hidden; }
+
+    .widget-header {
+      background: var(--blue);
+      color: #fff;
+      padding: .9rem 1.2rem;
+    }
+    .widget-header .widget-price-was {
+      font-size: .8rem;
+      text-decoration: line-through;
+      opacity: .7;
+    }
+    .widget-header .widget-price-now {
+      font-size: 1.6rem;
+      font-weight: 900;
+    }
+    .widget-header .widget-price-note { font-size: .75rem; opacity: .85; }
+
+    /* 5. DEAL EXPIRY — "Price valid for X minutes" */
+    .deal-expiry {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: .6rem .9rem;
+      font-size: .78rem;
+      color: #92400e;
+      font-weight: 600;
+      margin: .9rem 0 .75rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .deal-expiry #widget-timer {
+      font-weight: 900;
+      color: var(--red);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .widget-body { padding: 1rem 1.2rem 1.4rem; }
+    .w-field { margin-bottom: .75rem; }
+    .w-field label { display: block; font-size: .75rem; font-weight: 600; color: var(--muted); margin-bottom: .25rem; }
+    .w-field select, .w-field input {
+      width: 100%;
+      border: 1.5px solid var(--grey-border);
+      border-radius: 8px;
+      padding: .55rem .8rem;
+      font-size: .875rem;
+    }
+    .w-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+
+    .btn-reserve {
+      display: block;
+      width: 100%;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: .85rem;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: .5rem;
+    }
+    .btn-reserve:hover { background: #15803d; }
+
+    .widget-trust { font-size: .72rem; color: var(--muted); text-align: center; margin-top: .6rem; }
+
+    /* 2. SCARCITY IN WIDGET */
+    .widget-scarcity {
+      background: var(--red-light);
+      border-radius: 8px;
+      padding: .6rem .9rem;
+      font-size: .78rem;
+      color: var(--red);
+      font-weight: 700;
+      margin-bottom: .75rem;
+      text-align: center;
+    }
+
+    /* 3. LIVE VIEWER COUNT */
+    .live-viewers {
+      text-align: center;
+      font-size: .75rem;
+      color: var(--orange);
+      font-weight: 600;
+      margin-bottom: .6rem;
+    }
+    .live-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--orange);
+      border-radius: 50%;
+      animation: pulse 1.2s infinite;
+      margin-right: 4px;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+
+    /* TEST BADGE */
+    .test-badge {
+      position: fixed;
+      top: 8px; right: 8px;
+      background: #fef08a;
+      color: #713f12;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .3rem .6rem;
+      border-radius: 6px;
+      z-index: 9999;
+      border: 1px solid #ca8a04;
+    }
+
+    @media (max-width: 680px) {
+      .two-col { grid-template-columns: 1fr; }
+      .book-widget { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="test-badge">🧪 DarkShield Test — False Urgency</div>
+
+<nav>
+  <span class="logo">⚡ QuickStay</span>
+  <a href="#">Hotels</a>
+  <a href="#">Deals</a>
+  <a href="#">My Trips</a>
+</nav>
+
+<div class="page">
+
+  <!-- HOTEL HEADER -->
+  <div class="hotel-header">
+    <h1>Hôtel Lumière, Paris</h1>
+    <div class="meta">
+      <span class="stars">★★★★</span> &nbsp;4.6 / 5 · 1,842 reviews &nbsp;·&nbsp; 8th arrondissement
+    </div>
+  </div>
+
+  <!-- PHOTO PLACEHOLDER GRID -->
+  <div class="photo-grid">
+    <div style="background:#94a3b8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;">📷 Hotel Photo</div>
+    <div style="background:#b0bec5;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85rem;">Room</div>
+    <div style="background:#c8d6df;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85rem;">Lobby</div>
+  </div>
+
+  <div class="two-col">
+
+    <!-- LEFT -->
+    <div>
+
+      <!-- FALSE URGENCY: SCARCITY -->
+      <div class="scarcity">Only 2 rooms left at this price!</div>
+
+      <!-- ROOM OPTIONS -->
+      <div class="card">
+        <div class="card-body">
+          <div class="sec-title">Available Rooms</div>
+
+          <!-- ROOM 1 -->
+          <div class="room-card">
+            <div class="room-card-top">
+              <div>
+                <div class="room-name">Classic Double Room</div>
+                <div class="room-features">🛏 Queen bed &nbsp;·&nbsp; 🛁 En-suite &nbsp;·&nbsp; 📶 Free WiFi</div>
+              </div>
+              <div style="text-align:right">
+                <!-- FALSE URGENCY: FAKE STRIKETHROUGH PRICE -->
+                <div class="price-was">£189/night</div>
+                <div class="price-now">£141<span class="discount-badge">–25%</span></div>
+                <div class="price-sub">incl. taxes &amp; fees</div>
+              </div>
+            </div>
+            <div class="room-card-bottom">
+              <!-- FALSE URGENCY: FAKE SOCIAL PROOF -->
+              <span class="social-proof">🔥 23 people booked this today</span>
+              <button class="btn-book">Reserve</button>
+            </div>
+          </div>
+
+          <!-- ROOM 2 -->
+          <div class="room-card">
+            <div class="room-card-top">
+              <div>
+                <div class="room-name">Superior Double with Balcony</div>
+                <div class="room-features">🛏 King bed &nbsp;·&nbsp; 🛁 En-suite &nbsp;·&nbsp; 🌇 City view</div>
+              </div>
+              <div style="text-align:right">
+                <div class="price-was">£239/night</div>
+                <div class="price-now">£179<span class="discount-badge">–25%</span></div>
+                <div class="price-sub">incl. taxes &amp; fees</div>
+              </div>
+            </div>
+            <div class="room-card-bottom">
+              <span class="social-proof">👁 14 people viewing right now</span>
+              <button class="btn-book">Reserve</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COUNTDOWN TIMER CARD -->
+      <div class="card">
+        <div class="countdown-bar">
+          ⏰ These prices expire in: <span id="timer">09:59</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:.85rem;color:#475569;">
+            This exclusive rate is held for a limited time. After the timer expires, prices will return to standard rates and availability may change.
+          </p>
+        </div>
+      </div>
+
+      <!-- ABOUT -->
+      <div class="card about">
+        <div class="card-body">
+          <div class="sec-title">About the Hotel</div>
+          <p>Located in the heart of Paris, Hôtel Lumière offers elegant rooms and suites with views over the city's iconic skyline. Steps from the Champs-Élysées, the hotel combines classic Haussmann architecture with modern amenities.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: BOOKING WIDGET -->
+    <div class="book-widget">
+      <div class="card">
+        <div class="widget-header">
+          <div class="widget-price-was">From £189/night</div>
+          <div class="widget-price-now">£141<small style="font-size:.9rem;font-weight:400">/night</small></div>
+          <div class="widget-price-note">25% off · taxes included</div>
+        </div>
+        <div class="widget-body">
+
+          <!-- FALSE URGENCY: SCARCITY IN WIDGET -->
+          <div class="widget-scarcity">⚠ Only 2 rooms left at this price</div>
+
+          <!-- FALSE URGENCY: LIVE VIEWERS -->
+          <div class="live-viewers">
+            <span class="live-dot"></span>
+            <span id="viewer-count">38</span> people are viewing this right now
+          </div>
+
+          <!-- FALSE URGENCY: PRICE EXPIRY COUNTDOWN -->
+          <div class="deal-expiry">
+            ⏱ Price locked for <span id="widget-timer">09:59</span> — book now to secure this rate
+          </div>
+
+          <div class="w-row">
+            <div class="w-field"><label>Check-in</label><input type="date" value="2026-07-19"/></div>
+            <div class="w-field"><label>Check-out</label><input type="date" value="2026-07-26"/></div>
+          </div>
+          <div class="w-field">
+            <label>Guests</label>
+            <select><option>2 adults</option><option>1 adult</option><option>3 adults</option></select>
+          </div>
+          <div class="w-field">
+            <label>Room</label>
+            <select><option>Classic Double — £141/night</option><option>Superior Balcony — £179/night</option></select>
+          </div>
+
+          <button class="btn-reserve">Reserve Now — Don't Miss Out!</button>
+          <p class="widget-trust">🔒 Free cancellation · No booking fee · Instant confirmation</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* ─────────────────────────────────────────
+     FALSE URGENCY: Countdown timers
+     Start at 9:59 and count down.
+     In a real dark pattern site these reset
+     on every page load / refresh.
+  ───────────────────────────────────────── */
+  function startCountdown(elementId, seconds) {
+    let remaining = seconds;
+    const el = document.getElementById(elementId);
+    const tick = () => {
+      if (remaining <= 0) {
+        remaining = seconds; // DARK PATTERN: resets — never actually expires
+      }
+      const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+      const s = String(remaining % 60).padStart(2, '0');
+      el.textContent = m + ':' + s;
+      remaining--;
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  startCountdown('timer', 599);
+  startCountdown('widget-timer', 599);
+
+  /* ─────────────────────────────────────────
+     FALSE URGENCY: Fake fluctuating viewer count
+     Randomly oscillates to appear "live"
+  ───────────────────────────────────────── */
+  let viewers = 38;
+  setInterval(() => {
+    viewers += Math.floor(Math.random() * 5) - 2;
+    viewers = Math.max(12, Math.min(60, viewers));
+    document.getElementById('viewer-count').textContent = viewers;
+  }, 3000);
+</script>
+</body>
+</html>

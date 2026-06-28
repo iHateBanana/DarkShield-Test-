@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DarkShield</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 280px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      color: #111827;
+      background: #fff;
+    }
+
+    .header {
+      background: #dc2626;
+      padding: 13px 15px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .header h1 { color: #fff; font-size: 14px; font-weight: 700; }
+    .header p  { color: rgba(255,255,255,0.85); font-size: 10.5px; margin-top: 1px; }
+
+    .body { padding: 14px 15px; }
+
+    .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #9ca3af;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .empty {
+      color: #9ca3af;
+      font-size: 12px;
+      text-align: center;
+      padding: 6px 0;
+      line-height: 1.5;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    .row:last-child { margin-bottom: 0; }
+    .row-label { color: #6b7280; }
+
+    .pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .pill-found { background: #fee2e2; color: #991b1b; }
+    .pill-clean { background: #f0fdf4; color: #15803d; }
+    .pill-none  { background: #f3f4f6; color: #6b7280; }
+
+    .result-url {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 8px;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    .footer {
+      padding: 9px 15px;
+      border-top: 1px solid #f3f4f6;
+      font-size: 10.5px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+    <div>
+      <h1>DarkShield</h1>
+      <p>Dark pattern detector</p>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="label">Last Scan Result</div>
+    <div class="card" id="result-card">
+      <div class="empty">No results yet.<br>Navigate to a supported site to run DarkShield.</div>
+    </div>
+  </div>
+
+  <div class="footer">Amazon · Booking.com · Ryanair</div>
+
+  <script src="src/popup.js"></script>
+</body>
+</html>

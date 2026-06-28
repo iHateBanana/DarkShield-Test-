@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkyFare – Cheap Flights</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #1a56db;
+      --blue-dark: #1040b0;
+      --grey-bg: #f3f4f6;
+      --grey-light: #e5e7eb;
+      --grey-mid: #9ca3af;
+      --text: #111827;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--grey-bg);
+      color: var(--text);
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--blue);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      height: 56px;
+      gap: 2rem;
+    }
+    nav .logo { color: #fff; font-size: 1.25rem; font-weight: 700; letter-spacing: -.5px; }
+    nav a { color: rgba(255,255,255,.8); font-size: .875rem; text-decoration: none; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1a56db 0%, #1e40af 100%);
+      color: #fff;
+      padding: 3rem 2rem 2.5rem;
+      text-align: center;
+    }
+    .hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: .5rem; }
+    .hero p  { font-size: 1rem; opacity: .85; }
+
+    /* ── SEARCH BOX ── */
+    .search-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 780px;
+      margin: -1.5rem auto 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,.1);
+    }
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr auto;
+      gap: .75rem;
+      align-items: end;
+    }
+    .field label { display: block; font-size: .75rem; font-weight: 600; color: var(--grey-mid); margin-bottom: .3rem; text-transform: uppercase; letter-spacing: .05em; }
+    .field input {
+      width: 100%;
+      border: 1.5px solid var(--grey-light);
+      border-radius: 8px;
+      padding: .6rem .8rem;
+      font-size: .95rem;
+    }
+    .btn-search {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .65rem 1.4rem;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-search:hover { background: var(--blue-dark); }
+
+    /* ── RESULTS ── */
+    .results { max-width: 780px; margin: 0 auto 3rem; }
+    .result-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    }
+    .airline { font-weight: 700; font-size: 1rem; }
+    .times   { font-size: .9rem; color: #374151; margin-top: .2rem; }
+    .stops   { font-size: .78rem; color: var(--grey-mid); }
+    .price   { font-size: 1.3rem; font-weight: 800; color: var(--blue); }
+    .price-sub { font-size: .75rem; color: var(--grey-mid); text-align: right; }
+    .btn-select {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .55rem 1.1rem;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: .5rem;
+    }
+
+    /* ── OVERLAY BACKDROP ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    /* ── CONFIRMSHAMING MODAL ── */
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 440px;
+      width: 90%;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      text-align: center;
+    }
+    .modal-top {
+      background: var(--blue);
+      color: #fff;
+      padding: 1.5rem 2rem 1.2rem;
+    }
+    .modal-top .tag {
+      display: inline-block;
+      background: #facc15;
+      color: #1a1a1a;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: .2rem .6rem;
+      border-radius: 4px;
+      margin-bottom: .7rem;
+    }
+    .modal-top h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: .4rem; }
+    .modal-top p  { font-size: .9rem; opacity: .9; }
+
+    .modal-body { padding: 1.5rem 2rem 1.8rem; }
+    .modal-body .price-big {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--blue);
+      margin-bottom: .2rem;
+    }
+    .modal-body .price-note { font-size: .8rem; color: var(--grey-mid); margin-bottom: 1.2rem; }
+
+    /* ── CTA accept ── */
+    .btn-yes {
+      display: block;
+      width: 100%;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: .85rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: .75rem;
+    }
+    .btn-yes:hover { background: #15803d; }
+
+    /* ── CONFIRMSHAMING decline ── */
+    /* Small, grey, guilt-inducing — the dark pattern */
+    .btn-no {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      color: #9ca3af;       /* low contrast grey */
+      font-size: .75rem;    /* much smaller than accept */
+      cursor: pointer;
+      padding: .3rem;
+      text-decoration: underline;
+    }
+    /* The actual confirmshaming text is in the HTML below */
+
+    /* ── TEST LABEL ── */
+    .test-badge {
+      position: fixed;
+      top: 8px; right: 8px;
+      background: #fef08a;
+      color: #713f12;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .3rem .6rem;
+      border-radius: 6px;
+      z-index: 9999;
+      border: 1px solid #ca8a04;
+    }
+  </style>
+</head>
+<body>
+
+<div class="test-badge">🧪 DarkShield Test — Confirmshaming</div>
+
+<!-- NAV -->
+<!-- <nav>
+  <span class="logo">✈ SkyFare</span>
+  <a href="#">Flights</a>
+  <a href="#">Hotels</a>
+  <a href="#">Cars</a>
+</nav> -->
+
+<!-- HERO -->
+<!-- <div class="hero">
+  <h1>Find the Cheapest Flights</h1>
+  <p>Compare hundreds of airlines in seconds</p>
+</div> -->
+
+<!-- SEARCH -->
+<!-- <div class="search-card">
+  <div class="search-row">
+    <div class="field"><label>From</label><input value="London (LHR)"/></div>
+    <div class="field"><label>To</label><input value="Barcelona (BCN)"/></div>
+    <div class="field"><label>Depart</label><input value="14 Jul 2026"/></div>
+    <div class="field"><label>Return</label><input value="21 Jul 2026"/></div>
+    <button class="btn-search">Search</button>
+  </div>
+</div> -->
+
+<!-- FLIGHT RESULTS -->
+<!-- <div class="results">
+  <div class="result-card">
+    <div>
+      <div class="airline">Vueling</div>
+      <div class="times">06:30 → 09:55 &nbsp;·&nbsp; 3h 25m</div>
+      <div class="stops">Non-stop</div>
+    </div>
+    <div style="text-align:right">
+      <div class="price">£89</div>
+      <div class="price-sub">per person</div>
+      <button class="btn-select" onclick="showModal()">Select</button>
+    </div>
+  </div>
+  <div class="result-card">
+    <div>
+      <div class="airline">Ryanair</div>
+      <div class="times">10:15 → 13:40 &nbsp;·&nbsp; 3h 25m</div>
+      <div class="stops">Non-stop</div>
+    </div>
+    <div style="text-align:right">
+      <div class="price">£67</div>
+      <div class="price-sub">per person</div>
+      <button class="btn-select" onclick="showModal()">Select</button>
+    </div>
+  </div>
+  <div class="result-card">
+    <div>
+      <div class="airline">British Airways</div>
+      <div class="times">14:00 → 17:25 &nbsp;·&nbsp; 3h 25m</div>
+      <div class="stops">Non-stop</div>
+    </div>
+    <div style="text-align:right">
+      <div class="price">£124</div>
+      <div class="price-sub">per person</div>
+      <button class="btn-select" onclick="showModal()">Select</button>
+    </div>
+  </div>
+</div> -->
+
+<!-- ═══════════════════════════════════════════
+     CONFIRMSHAMING MODAL
+     Dark pattern: opt-out button uses guilt-inducing language
+     "No thanks, I don't mind paying more" instead of neutral "No thanks"
+═══════════════════════════════════════════ -->
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-top">
+      <div class="tag">✦ Exclusive Member Deal</div>
+      <h2 id="modal-title">Unlock an extra 15% off!</h2>
+      <p>Sign up free and save on every booking, forever.</p>
+    </div>
+    <div class="modal-body">
+      <div class="price-big">15% OFF</div>
+      <div class="price-note">Applied automatically at checkout · Cancel anytime</div>
+
+      <!-- ACCEPT — large, green, prominent -->
+      <button class="btn-yes" onclick="closeModal()">
+        Yes! Save 15% on my flight
+      </button>
+
+      <!-- CONFIRMSHAMING DECLINE — small, grey, guilt-inducing -->
+      <button class="btn-no" onclick="closeModal()" id="decline-btn">
+        No thanks, I don't mind paying full price
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showModal() {
+    document.getElementById('overlay').style.display = 'flex';
+  }
+  function closeModal() {
+    document.getElementById('overlay').style.display = 'none';
+  }
+  // Auto-show on page load after 1.5s
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('overlay').style.display = 'flex';
+    }, 1500);
+  });
+</script>
+</body>
+</html>

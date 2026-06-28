@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StayEase – Hotel Checkout</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #0d9488;
+      --teal-dark: #0f766e;
+      --amber: #f59e0b;
+      --red: #dc2626;
+      --grey-bg: #f1f5f9;
+      --grey-border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #94a3b8;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--grey-bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--teal);
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+    }
+    nav .logo { color: #fff; font-size: 1.1rem; font-weight: 800; }
+
+    /* BREADCRUMB */
+    .breadcrumb {
+      max-width: 900px;
+      margin: 1.2rem auto .5rem;
+      padding: 0 1rem;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+    .breadcrumb span { color: var(--teal); font-weight: 600; }
+
+    /* LAYOUT */
+    .layout {
+      max-width: 900px;
+      margin: 0 auto 3rem;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 1px 8px rgba(0,0,0,.07);
+      overflow: hidden;
+    }
+    .card-header {
+      background: var(--teal);
+      color: #fff;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .card-body { padding: 1.5rem; }
+
+    /* HOTEL SUMMARY */
+    .hotel-name { font-size: 1.2rem; font-weight: 800; margin-bottom: .2rem; }
+    .hotel-meta { font-size: .85rem; color: var(--muted); margin-bottom: 1rem; }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: .5rem 0;
+      border-bottom: 1px solid var(--grey-border);
+      font-size: .9rem;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: #64748b; }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 2px solid var(--grey-border);
+    }
+
+    /* ═══════════════════════════════
+       PRESELECTION ADD-ONS
+       Dark patterns:
+       1. Expensive add-ons checked by default
+       2. Opt-out is visually harder than accepting
+       3. Small grey text below each checkbox hides the true cost
+    ════════════════════════════════ */
+    .addon {
+      display: flex;
+      align-items: flex-start;
+      gap: .9rem;
+      padding: .9rem;
+      border: 1.5px solid var(--grey-border);
+      border-radius: 8px;
+      margin-bottom: .75rem;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .addon.selected { border-color: var(--teal); background: #f0fdfa; }
+
+    .addon input[type="checkbox"] {
+      margin-top: 2px;
+      width: 17px;
+      height: 17px;
+      accent-color: var(--teal);
+      flex-shrink: 0;
+    }
+    .addon-text { flex: 1; }
+    .addon-name {
+      font-size: .9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .badge-recommended {
+      background: var(--teal);
+      color: #fff;
+      font-size: .65rem;
+      font-weight: 700;
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .addon-desc { font-size: .78rem; color: #64748b; margin-top: .15rem; }
+
+    /* Price displayed small and grey to deemphasise cost */
+    .addon-price {
+      font-size: .75rem;
+      color: var(--muted);  /* intentionally muted — dark pattern */
+      margin-top: .2rem;
+    }
+    .addon-price-right {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--teal);
+      white-space: nowrap;
+      align-self: center;
+    }
+
+    /* GUEST DETAILS */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: .8rem; font-weight: 600; color: #475569; margin-bottom: .3rem; }
+    .form-group input {
+      width: 100%;
+      border: 1.5px solid var(--grey-border);
+      border-radius: 8px;
+      padding: .6rem .85rem;
+      font-size: .9rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+    /* PRICE SUMMARY */
+    .price-line {
+      display: flex;
+      justify-content: space-between;
+      padding: .55rem 0;
+      font-size: .875rem;
+      border-bottom: 1px solid var(--grey-border);
+    }
+    .price-line:last-of-type { border-bottom: none; }
+    .price-line.total {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--teal);
+      margin-top: .25rem;
+      padding-top: .75rem;
+      border-top: 2px solid var(--teal);
+    }
+    .addon-line { color: #64748b; font-size: .8rem; }
+
+    /* BOOK BUTTON */
+    .btn-book {
+      display: block;
+      width: 100%;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: .9rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .btn-book:hover { background: var(--teal-dark); }
+
+    /* TRUST STRIP */
+    .trust { font-size: .72rem; color: var(--muted); text-align: center; margin-top: .75rem; }
+
+    /* TEST BADGE */
+    .test-badge {
+      position: fixed;
+      top: 8px; right: 8px;
+      background: #fef08a;
+      color: #713f12;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .3rem .6rem;
+      border-radius: 6px;
+      z-index: 9999;
+      border: 1px solid #ca8a04;
+    }
+
+    @media (max-width: 640px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="test-badge">🧪 DarkShield Test — Preselection</div>
+
+<nav><span class="logo">🏨 StayEase</span></nav>
+
+<div class="breadcrumb">Search › Results › <span>Checkout</span></div>
+
+<div class="layout">
+
+  <!-- LEFT COLUMN -->
+  <div>
+
+    <!-- HOTEL SUMMARY -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-header">Your Booking</div>
+      <div class="card-body">
+        <div class="hotel-name">Hotel Arc de Triomphe, Paris</div>
+        <div class="hotel-meta">⭐⭐⭐⭐ · Champs-Élysées · Free cancellation until 12 Jul</div>
+        <div class="detail-row"><span class="detail-label">Check-in</span><strong>Sat 19 Jul 2026</strong></div>
+        <div class="detail-row"><span class="detail-label">Check-out</span><strong>Sat 26 Jul 2026</strong></div>
+        <div class="detail-row"><span class="detail-label">Guests</span><strong>2 adults · 1 room</strong></div>
+        <div class="detail-row"><span class="detail-label">Room type</span><strong>Superior Double</strong></div>
+        <div class="detail-row"><span class="detail-label">Room rate (7 nights)</span><strong>£623</strong></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         PRESELECTION DARK PATTERN SECTION
+         All three checkboxes are checked by default.
+         User must actively uncheck to remove extras.
+    ═══════════════════════════════════════════ -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-header">Enhance Your Stay</div>
+      <div class="card-body">
+        <div class="section-title">Recommended extras — added for you</div>
+
+        <!-- ADD-ON 1: Travel insurance — PRESELECTED -->
+        <label class="addon selected" id="addon1-label">
+          <input type="checkbox" id="addon1" checked onchange="updateTotal()"/>
+          <div class="addon-text">
+            <div class="addon-name">
+              Travel Insurance
+              <span class="badge-recommended">Recommended</span>
+            </div>
+            <div class="addon-desc">Cover for cancellations, medical emergencies & lost baggage</div>
+            <!-- Cost buried in muted small text — dark pattern -->
+            <div class="addon-price">Added automatically · remove by unchecking</div>
+          </div>
+          <span class="addon-price-right">+£38.99</span>
+        </label>
+
+        <!-- ADD-ON 2: Airport transfer — PRESELECTED -->
+        <label class="addon selected" id="addon2-label">
+          <input type="checkbox" id="addon2" checked onchange="updateTotal()"/>
+          <div class="addon-text">
+            <div class="addon-name">
+              Airport Transfer (return)
+              <span class="badge-recommended">Popular</span>
+            </div>
+            <div class="addon-desc">Private taxi to/from Charles de Gaulle · meet &amp; greet included</div>
+            <div class="addon-price">Added automatically · remove by unchecking</div>
+          </div>
+          <span class="addon-price-right">+£64.00</span>
+        </label>
+
+        <!-- ADD-ON 3: Breakfast — PRESELECTED -->
+        <label class="addon selected" id="addon3-label">
+          <input type="checkbox" id="addon3" checked onchange="updateTotal()"/>
+          <div class="addon-text">
+            <div class="addon-name">Daily Breakfast (per person)</div>
+            <div class="addon-desc">Full continental buffet · served 07:00–10:30 daily</div>
+            <div class="addon-price">Added automatically · remove by unchecking</div>
+          </div>
+          <span class="addon-price-right">+£84.00</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- GUEST DETAILS -->
+    <div class="card">
+      <div class="card-header">Guest Details</div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input placeholder="Jane"/></div>
+          <div class="form-group"><label>Last Name</label><input placeholder="Smith"/></div>
+        </div>
+        <div class="form-group"><label>Email</label><input placeholder="jane@example.com"/></div>
+        <div class="form-group"><label>Phone</label><input placeholder="+44 7700 000000"/></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN: PRICE SUMMARY -->
+  <div>
+    <div class="card">
+      <div class="card-header">Price Summary</div>
+      <div class="card-body">
+        <div class="price-line"><span>Room rate (7 nights)</span><span>£623.00</span></div>
+        <div class="price-line addon-line" id="line-insurance"><span>✓ Travel Insurance</span><span>£38.99</span></div>
+        <div class="price-line addon-line" id="line-transfer"><span>✓ Airport Transfer</span><span>£64.00</span></div>
+        <div class="price-line addon-line" id="line-breakfast"><span>✓ Daily Breakfast</span><span>£84.00</span></div>
+        <div class="price-line total"><span>Total</span><span id="total">£809.99</span></div>
+
+        <button class="btn-book">Complete Booking</button>
+        <p class="trust">🔒 Secure payment · Instant confirmation · Free cancellation</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const addons = [
+    { id: 'addon1', price: 38.99, lineId: 'line-insurance', labelId: 'addon1-label', name: '✓ Travel Insurance' },
+    { id: 'addon2', price: 64.00, lineId: 'line-transfer',  labelId: 'addon2-label', name: '✓ Airport Transfer' },
+    { id: 'addon3', price: 84.00, lineId: 'line-breakfast', labelId: 'addon3-label', name: '✓ Daily Breakfast'  },
+  ];
+  const BASE = 623;
+
+  function updateTotal() {
+    let total = BASE;
+    addons.forEach(a => {
+      const cb  = document.getElementById(a.id);
+      const row = document.getElementById(a.lineId);
+      const lbl = document.getElementById(a.labelId);
+      if (cb.checked) {
+        total += a.price;
+        row.style.display = '';
+        lbl.classList.add('selected');
+      } else {
+        row.style.display = 'none';
+        lbl.classList.remove('selected');
+      }
+    });
+    document.getElementById('total').textContent = '£' + total.toFixed(2);
+  }
+</script>
+</body>
+</html>
