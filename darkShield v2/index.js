@@ -801,3 +801,4 @@
   console.log('%c🛡 DarkShield v1.1 loaded. Call darkshield.stop() to deactivate.', 'color:#e53e3e;font-weight:bold;');
 
 })();
+

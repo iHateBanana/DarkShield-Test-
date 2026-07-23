@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { width: 320px; padding: 15px; font-family: sans-serif; margin: 0; }
+    h3 { margin: 0 0 12px; font-size: 16px; }
+    button { width: 100%; padding: 10px; margin-top: 8px; cursor: pointer;
+             border: none; border-radius: 4px; font-size: 14px; }
+    #scanBtn { background: #4a6cf7; color: white; }
+    #scanBtn:hover { background: #3b5de7; }
+    #settingsBtn { background: #f0f0f0; color: #333; margin-top: 4px; }
+    #history { margin-top: 12px; max-height: 200px; overflow-y: auto; }
+    .history-item { padding: 8px; margin: 4px 0; border-radius: 4px; font-size: 12px; }
+    .history-item.dark { background: #fff0f0; border-left: 3px solid #ff4444; }
+    .history-item.clean { background: #f0fff0; border-left: 3px solid #44bb44; }
+    .settings-panel { display: none; margin-top: 10px; padding-top: 10px;
+                      border-top: 1px solid #eee; }
+    .settings-panel label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+    .settings-panel p { font-size: 12px; color: #888; margin: 4px 0 8px; }
+    .settings-panel button { background: #666; color: white; margin-top: 6px; }
+    #saveStatus { font-size: 12px; color: #666; margin-top: 6px; min-height: 16px; }
+    .empty { color: #999; text-align: center; margin-top: 20px; font-size: 13px; padding: 12px; }
+  </style>
+</head>
+<body>
+  <h3>🛡️ DarkShield</h3>
+
+  <button id="scanBtn">Scan current page</button>
+  <button id="settingsBtn">Settings</button>
+
+  <div class="settings-panel" id="settingsPanel">
+    <label>Server URL</label>
+    <p>The API key lives on your Laravel server — no key needed here.</p>
+    <label>API base URL:</label>
+    <input type="text" id="apiBase" value="http://127.0.0.1:8000/api" style="width:100%;padding:5px;box-sizing:border-box;font-size:13px;">
+    <button id="saveKeyBtn">Save</button>
+    <div id="saveStatus"></div>
+  </div>
+
+  <div id="history">
+    <div class="empty">No scans yet. Click "Scan current page" to start.</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
